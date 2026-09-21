@@ -1,0 +1,28 @@
+const dotenv = require("dotenv");
+dotenv.config();
+const app = require("./src/app");
+const connectDB = require("./src/config/db");
+
+const PORT = process.env.PORT;
+
+
+connectDB();
+const startServer = () => {
+  try {
+    app.listen({ port: PORT }, (err, address) => {
+      if (err) {
+        throw new Error(err);
+      }
+      console.log(`Server Running on Port: ${PORT} and Address: ${address}`);
+    });
+  } catch (error) {
+    console.log({
+      errorType: "Server Initialisation Error",
+      errorMessage: error.message,
+      status: "FAILURE",
+    });
+    process.exit(1);
+  }
+};
+
+startServer()
