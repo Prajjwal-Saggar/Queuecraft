@@ -17,7 +17,7 @@ const startServer = () => {
     });
   } catch (error) {
     console.log({
-      errorType: "Server Initialisation Error",
+      errorType: "Server Initialization Error",
       errorMessage: error.message,
       status: "FAILURE",
     });
