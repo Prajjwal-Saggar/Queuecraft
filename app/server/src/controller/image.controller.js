@@ -4,6 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { pipeline } = require("node:stream/promises");
 const { v4: uuidv4 } = require("uuid");
+const imageQueue = require("../queues/image.queue");
 const jobPostController = async (req, res) => {
   try {
     const data = await req.file();
@@ -26,7 +27,30 @@ const jobPostController = async (req, res) => {
       storedFilename,
     );
     await pipeline(data.file, fs.createWriteStream(uploadPath));
-    const savedJob = await Image.create({ originalFilename, storedFilename });
+    const savedJob = await Image.create({
+      originalFilename,
+      storedFilename,
+      status: "QUEUED",
+    });
+
+    try {
+      await imageQueue.add(
+        "resize-image",
+        { jobId: savedJob._id.toString() },
+        {
+          attempts: 3,
+          backoff: {
+            type: "exponential",
+            delay: 1000,
+          },
+        },
+      );
+    } catch (queueError) {
+      savedJob.status = "FAILED";
+      savedJob.error = queueError.message;
+      await savedJob.save();
+      throw queueError;
+    }
 
     return res.code(201).send({
       savedJob: savedJob.toObject(),
@@ -83,13 +107,11 @@ const getAllJobs = async (req, res) => {
     const jobs = await Image.find().sort({ createdAt: -1 });
 
     if (jobs.length === 0) {
-      return res
-        .code(200)
-        .send({
-          jobs: [],
-          message: "No jobs available at the moment",
-          status: "SUCCESS",
-        });
+      return res.code(200).send({
+        jobs: [],
+        message: "No jobs available at the moment",
+        status: "SUCCESS",
+      });
     }
 
     return res
