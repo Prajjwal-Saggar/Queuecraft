@@ -1,0 +1,58 @@
+services:
+  backend:
+    build:
+      context: ./app/server
+    container_name: queue_craft_backend
+    env_file:
+      - ./app/server/.env
+    environment:
+      REDIS_HOST: redis
+    volumes:
+      - queue_craft_uploads:/app/uploads
+      - queue_craft_results:/app/results
+    networks:
+      - queue_craft_network
+    depends_on:
+      - redis
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build:
+      context: ./app/client
+    container_name: queue_craft_frontend
+    depends_on:
+      - backend
+    networks:
+      - queue_craft_network
+    ports:
+      - "5173:80"
+
+  redis:
+    image: redis
+    container_name: queue_craft_redis
+    networks:
+      - queue_craft_network
+
+  worker:
+    build:
+      context: ./app/worker
+    container_name: queue_craft_worker
+    env_file:
+      - ./app/worker/.env
+    environment:
+      REDIS_HOST: redis
+    volumes:
+      - queue_craft_uploads:/server/uploads
+      - queue_craft_results:/app/results
+    networks:
+      - queue_craft_network
+    depends_on:
+      - redis
+
+networks:
+  queue_craft_network:
+
+volumes:
+  queue_craft_uploads:
+  queue_craft_results:

@@ -27,6 +27,16 @@ const jobPostController = async (req, res) => {
       storedFilename,
     );
     await pipeline(data.file, fs.createWriteStream(uploadPath));
+
+    if (data.file.truncated) {
+      await fs.promises.unlink(uploadPath);
+      return res.code(413).send({
+        errorType: "Image Too Large",
+        errorMessage: "Image must be 10 MB or smaller",
+        status: "FAILURE",
+      });
+    }
+
     const savedJob = await Image.create({
       originalFilename,
       storedFilename,

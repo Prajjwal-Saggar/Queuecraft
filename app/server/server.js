@@ -5,11 +5,10 @@ const connectDB = require("./src/config/db");
 
 const PORT = process.env.PORT;
 
-
 connectDB();
 const startServer = () => {
   try {
-    app.listen({ port: PORT }, (err, address) => {
+    app.listen({ port: PORT, host: "0.0.0.0" }, (err, address) => {
       if (err) {
         throw new Error(err);
       }
@@ -25,4 +24,4 @@ const startServer = () => {
   }
 };
 
-startServer()
+startServer();

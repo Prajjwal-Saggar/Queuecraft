@@ -2,7 +2,11 @@ const app = require("fastify")({
   logger: true,
 });
 const cors  = require('@fastify/cors')
-app.register(require("@fastify/multipart"));
+app.register(require("@fastify/multipart"), {
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+  },
+});
 
 
 app.register(cors, {

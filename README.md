@@ -74,7 +74,7 @@ The API and worker are **fully decoupled** — they never call each other direct
 | Queue | BullMQ |
 | Queue backend | Redis |
 | Image processing | Sharp |
-| Containerization | Docker, Docker Compose *(in progress)* |
+| Containerization | Docker, Docker Compose |
 | Orchestration | Kubernetes *(planned)* |
 | Observability | Prometheus, Grafana, Loki, OpenTelemetry *(planned)* |
 | CI/CD | GitHub Actions *(planned)* |
@@ -97,10 +97,10 @@ The API and worker are **fully decoupled** — they never call each other direct
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/v0/image` | Upload an image and create a processing job |
-| `GET` | `/api/v0/image` | List all jobs |
-| `GET` | `/api/v0/image/:id` | Get the status/details of a single job |
-| `GET` | `/health` | Service health check |
+| `POST` | `/api/v0/job` | Upload an image and create a processing job |
+| `GET` | `/api/v0/job` | List all jobs |
+| `GET` | `/api/v0/job/:id` | Get the status/details of a single job |
+| `GET` | `/api/v0/health` | Service health check |
 
 ---
 
@@ -112,7 +112,7 @@ QueueCraft is being built in phases, each one adding a real production concern o
 |---|---|---|
 | 1 | Core upload pipeline — Fastify API, MongoDB metadata storage, file handling | ![done](https://img.shields.io/badge/done-brightgreen?style=flat-square) |
 | 2 | Async processing — BullMQ/Redis queue, worker service, retries with exponential backoff | ![done](https://img.shields.io/badge/done-brightgreen?style=flat-square) |
-| 3 | Containerization — Dockerfiles per service, Docker Compose orchestration | ![in progress](https://img.shields.io/badge/in%20progress-yellow?style=flat-square) |
+| 3 | Containerization — Dockerfiles per service, Docker Compose orchestration | ![done](https://img.shields.io/badge/done-brightgreen?style=flat-square) |
 | 4 | Observability — Prometheus, Grafana, Loki, OpenTelemetry | ![planned](https://img.shields.io/badge/planned-lightgrey?style=flat-square) |
 | 5 | Kubernetes — deployments, autoscaling, self-healing under failure | ![planned](https://img.shields.io/badge/planned-lightgrey?style=flat-square) |
 | 6 | CI/CD — automated lint/test/build/deploy via GitHub Actions | ![planned](https://img.shields.io/badge/planned-lightgrey?style=flat-square) |
@@ -121,7 +121,23 @@ QueueCraft is being built in phases, each one adding a real production concern o
 
 ## Running locally
 
-> Full setup instructions will be finalized once containerization (Phase 3) is complete. For now:
+### Docker Compose
+
+Copy the required environment values into `app/server/.env` and `app/worker/.env`, then run from the repository root:
+
+```bash
+docker compose up --build
+```
+
+The frontend is available at `http://localhost:5173` and the API at `http://localhost:3000`.
+
+To stop the stack:
+
+```bash
+docker compose down
+```
+
+### Manual setup
 
 **Prerequisites:** Node.js, a running Redis instance, a MongoDB Atlas connection string
 
@@ -142,7 +158,7 @@ npm install
 npm run dev
 ```
 
-Each service requires its own `.env` file — see `.env.example` in each directory for required variables (`MONGO_URI`, `REDIS_HOST`, `REDIS_PORT`, `UPLOADS_DIR`).
+Each service requires its own `.env` file. The server and worker require `MONGO_URI`, `REDIS_HOST`, and `REDIS_PORT`; the server also requires `PORT`.
 
 ---
 
