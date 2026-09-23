@@ -123,7 +123,15 @@ QueueCraft is being built in phases, each one adding a real production concern o
 
 ### Docker Compose
 
-Copy the required environment values into `app/server/.env` and `app/worker/.env`, then run from the repository root:
+Create local environment files from the committed templates:
+
+```bash
+cp app/server/.env.example app/server/.env
+cp app/worker/.env.example app/worker/.env
+cp app/client/.env.example app/client/.env
+```
+
+Replace the MongoDB placeholders in the server and worker files with your MongoDB Atlas connection string. Keep the real `.env` files private. Then run from the repository root:
 
 ```bash
 docker compose up --build
@@ -158,7 +166,7 @@ npm install
 npm run dev
 ```
 
-Each service requires its own `.env` file. The server and worker require `MONGO_URI`, `REDIS_HOST`, and `REDIS_PORT`; the server also requires `PORT`.
+Each service requires its own `.env` file. Use the matching `.env.example` as a starting point. The server and worker require `MONGO_URI`, `REDIS_HOST`, and `REDIS_PORT`; the server also requires `PORT`. The client requires `VITE_API_URL`.
 
 ---
 
